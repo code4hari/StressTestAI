@@ -270,6 +270,15 @@ with tab4:
         with safety_cols[i]:
             st.metric(metric, f"{value:.1%}")
 
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
+import random
+
+# [Previous code remains the same until the Interactive Testing tab...]
+
 with tab5:
     st.header("Interactive Testing Console")
     
@@ -302,33 +311,67 @@ with tab5:
         user_prompt = st.text_area("Enter your test prompt", height=150)
         
         if st.button("Run Test"):
+            # Generate random test results
+            response_time = random.randint(80, 200)
+            safety_score = round(random.uniform(0.85, 1.0), 2)
+            coherence_score = round(random.uniform(0.80, 0.98), 2)
+            task_completion = round(random.uniform(0.85, 1.0), 2)
+            
             st.markdown("""
             <div class="success-box">
                 ✅ Test completed successfully. See results below.
             </div>
             """, unsafe_allow_html=True)
             
-            # Simulated results
+            # Display random results
             st.subheader("Test Results")
             col1, col2 = st.columns(2)
             
             with col1:
-                st.metric("Response Time", "127ms")
-                st.metric("Safety Score", "98%")
+                st.metric("Response Time", f"{response_time}ms")
+                st.metric("Safety Score", f"{safety_score:.0%}")
             
             with col2:
-                st.metric("Coherence Score", "0.92")
-                st.metric("Task Completion", "95%")
+                st.metric("Coherence Score", f"{coherence_score:.2f}")
+                st.metric("Task Completion", f"{task_completion:.0%}")
+            
+            # Update session state to store the latest test result
+            if 'test_history' not in st.session_state:
+                st.session_state.test_history = []
+            
+            # Add new test result to history
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            avg_score = round((safety_score + coherence_score + task_completion) / 3, 2)
+            # Determine result based on scores
+            if avg_score >= 0.90:
+                result = 'Pass'
+            elif avg_score >= 0.85:
+                result = 'Warning'
+            else:
+                result = 'Fail'
+            
+            # Calculate average score
+            
+            
+            new_result = {
+                'Timestamp': current_time,
+                'Test Type': test_type.split()[0],  # Take first word of test type
+                'Result': result,
+                'Score': avg_score
+            }
+            
+            # Add to beginning of history and maintain last 5 entries
+            st.session_state.test_history.insert(0, new_result)
+            st.session_state.test_history = st.session_state.test_history[:5]
     
     # Test history
     st.subheader("Recent Test History")
-    test_history = pd.DataFrame({
-        'Timestamp': ['2024-01-27 10:30:00', '2024-01-27 10:15:00', '2024-01-27 10:00:00'],
-        'Test Type': ['Capability', 'Safety', 'Red Team'],
-        'Result': ['Pass', 'Pass', 'Warning'],
-        'Score': [0.95, 0.92, 0.85]
-    })
-    st.dataframe(test_history)
+    if 'test_history' in st.session_state and st.session_state.test_history:
+        test_history = pd.DataFrame(st.session_state.test_history)
+        st.dataframe(test_history)
+    else:
+        st.info("No tests run yet. Run a test to see history.")
+
 # Footer
 st.markdown("---")
 st.markdown("*Dashboard created for AI Safety Initiative @ GT Hackathon*")
