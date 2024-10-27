@@ -5,3 +5,6 @@ To run the evaluation pipeline you can clone the repository and run the visualiz
 
 # Project Report
 https://docs.google.com/document/d/1GxhnV6UKK8lTfLRJjErhFGT540agG43COHfQ9sndiQo/edit?usp=sharing
+
+# Video Demo
+https://youtu.be/xF7hI3YogA0
